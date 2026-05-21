@@ -4,6 +4,7 @@
 #include <iterator>
 #include <algorithm>
 #include <vector>
+#include <limits>
 
 int main()
 {
@@ -13,7 +14,8 @@ int main()
   while (!std::cin.eof()) {
     std::copy(iit_t{std::cin}, iit_t{}, std::back_inserter(data));
     if (std::cin.fail()) {
-      break;
+      std::cin.clear();
+      std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
     }
   }
   std::sort(data.begin(), data.end());

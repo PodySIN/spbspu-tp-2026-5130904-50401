@@ -1,5 +1,6 @@
 #include "types.hpp"
 #include <cmath>
+#include <iomanip>
 
 std::istream& hvostov::operator>>(std::istream& in, DataStruct& dest)
 {
@@ -128,7 +129,7 @@ std::ostream& hvostov::operator<<(std::ostream& out, const DoubleSciO& dest)
       }
     }
     mantissa = std::round(mantissa * 10.0) / 10.0;
-    out << mantissa << "e";
+    out << std::fixed << std::setprecision(1) << mantissa << "e";
     if (exponent >= 0) {
       out << "+";
     }
