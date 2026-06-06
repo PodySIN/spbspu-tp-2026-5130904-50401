@@ -290,14 +290,11 @@ void hvostov::maxSeq(std::istream& in, std::ostream& out, const std::vector< Pol
   using namespace std::placeholders;
   Polygon target;
   in >> target;
-  out << target << "<----------\n";
   if (!in || target.points.size() < 3) {
-    std::cout << "logic1";
     throw std::logic_error("Invalid polygon");
   }
 
   if (target.points.empty() || data.empty()) {
-    std::cout << "logic2";
     throw std::logic_error("Invalid polygon");
   }
   std::vector< bool > matches(data.size());
