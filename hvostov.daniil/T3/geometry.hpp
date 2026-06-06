@@ -18,7 +18,6 @@ namespace hvostov {
   };
   std::istream& operator>>(std::istream& in, Polygon& point);
   std::ostream& operator<<(std::ostream& out, const Polygon& point);
-  bool isPolygonEmpty(const Polygon& p);
 }
 
 #endif

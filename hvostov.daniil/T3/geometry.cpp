@@ -50,7 +50,7 @@ std::istream& hvostov::operator>>(std::istream& in, Polygon& dest)
   std::vector< point > polygon;
   using iit_t = std::istream_iterator< point >;
   std::copy_n(iit_t{in}, size, std::back_inserter(polygon));
-  if (in) {
+  if (in && polygon.size() == size) {
     dest.points = polygon;
   } else {
     in.setstate(std::ios_base::failbit);
@@ -72,9 +72,4 @@ std::ostream& hvostov::operator<<(std::ostream& out, const Polygon& dest)
   std::copy_n(dest.points.begin(), size - 1, oii_t{out, " "});
   out << dest.points[size - 1];
   return out;
-}
-
-bool hvostov::isPolygonEmpty(const Polygon& p)
-{
-  return p.points.empty();
 }
