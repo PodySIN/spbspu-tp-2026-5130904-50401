@@ -1,8 +1,10 @@
 #include "commands.hpp"
 #include <algorithm>
 #include <iomanip>
+#include <ios>
 #include <iostream>
 #include <numeric>
+#include <stdexcept>
 #include <vector>
 #include <cmath>
 #include <limits>
@@ -147,7 +149,6 @@ void hvostov::area(std::istream& in, std::ostream& out, const std::vector< Polyg
   if (param == "MEAN" && data.empty()) {
     throw std::logic_error("No polygons");
   }
-
   out << std::fixed << std::setprecision(1);
 
   if (param == "MEAN") {
@@ -161,6 +162,9 @@ void hvostov::area(std::istream& in, std::ostream& out, const std::vector< Polyg
     out << detail::sumAreasOfFiltered(data, detail::isOddVertexes) << "\n";
   } else {
     size_t n = std::stoul(param);
+    if (n < 3) {
+      throw std::logic_error("Invalid polygon");
+    }
     out << detail::sumAreasOfFiltered(data, std::bind(detail::hasVertexesCount, n, _1)) << "\n";
   }
 }
@@ -239,14 +243,18 @@ void hvostov::count(std::istream& in, std::ostream& out, const std::vector< Poly
 void hvostov::inFrame(std::istream& in, std::ostream& out, const std::vector< Polygon >& data)
 {
   using namespace std::placeholders;
+  Polygon test;
+  in >> test;
+
+  if (!in || test.points.size() < 3) {
+    throw std::logic_error("Invalid polygon");
+  }
+
   if (data.empty()) {
     out << "<FALSE>\n";
     in.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
     return;
   }
-
-  Polygon test;
-  in >> test;
 
   auto polyMinX = std::min_element(
       data.begin(), data.end(),
@@ -283,9 +291,12 @@ void hvostov::maxSeq(std::istream& in, std::ostream& out, const std::vector< Pol
   Polygon target;
   in >> target;
 
+  if (!in || target.points.size() < 3) {
+    throw std::logic_error("Invalid polygon");
+  }
+
   if (target.points.empty() || data.empty()) {
-    out << "0\n";
-    return;
+    throw std::logic_error("Invalid polygon");
   }
 
   std::vector< bool > matches(data.size());

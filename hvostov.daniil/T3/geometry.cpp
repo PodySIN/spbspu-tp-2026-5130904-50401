@@ -76,5 +76,5 @@ std::ostream& hvostov::operator<<(std::ostream& out, const Polygon& dest)
 
 bool hvostov::isPolygon(const Polygon& p)
 {
-  return p.points.empty();
+  return p.points.size() >= 3;
 }
