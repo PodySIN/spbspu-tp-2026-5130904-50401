@@ -229,6 +229,9 @@ void hvostov::count(std::istream& in, std::ostream& out, const std::vector< Poly
     out << std::count_if(data.begin(), data.end(), detail::isOddVertexes) << "\n";
   } else {
     size_t n = std::stoul(param);
+    if (n < 3) {
+      throw std::logic_error("Invalid polygon");
+    }
     out << std::count_if(data.begin(), data.end(), std::bind(detail::hasVertexesCount, n, _1)) << "\n";
   }
 }
@@ -309,7 +312,12 @@ void hvostov::process(std::unordered_map< std::string, cmd_t >& cmds, data_t dat
     return;
   }
   if (cmds.find(cmd) != cmds.end()) {
-    cmds.at(cmd)(std::cin, std::cout, data);
+    try {
+
+      cmds.at(cmd)(std::cin, std::cout, data);
+    } catch (...) {
+      hvostov::detail::handleError(std::cout, std::cin);
+    }
   } else {
     hvostov::detail::handleError(std::cout, std::cin);
   }

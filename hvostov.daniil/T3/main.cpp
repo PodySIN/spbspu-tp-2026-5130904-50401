@@ -31,10 +31,5 @@ int main(int argc, char** argv)
   cmds["COUNT"] = hvostov::count;
   cmds["INFRAME"] = hvostov::inFrame;
   cmds["MAXSEQ"] = hvostov::maxSeq;
-  try {
-    hvostov::process(cmds, data);
-  } catch (...) {
-    std::cerr << "Bad input!\n";
-    return 1;
-  }
+  hvostov::process(cmds, data);
 }
