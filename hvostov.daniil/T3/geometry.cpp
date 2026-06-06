@@ -58,7 +58,14 @@ std::istream& hvostov::operator>>(std::istream& in, Polygon& dest)
   std::copy_n(iit_t{in}, size, std::back_inserter(polygon));
 
   if (!in || polygon.size() != size) {
-    in.clear(); // Очищаем failbit
+    in.clear();
+    in.ignore(max, '\n');
+    dest.points.clear();
+    return in;
+  }
+
+  if (in.peek() != EOF && in.peek() != '\n') {
+    in.clear();
     in.ignore(max, '\n');
     dest.points.clear();
     return in;
@@ -77,6 +84,9 @@ std::ostream& hvostov::operator<<(std::ostream& out, const Polygon& dest)
   }
   IOguard fmtguard(out);
   size_t size = dest.points.size();
+  if (!size) {
+    return out;
+  }
   out << size << ' ';
   using oii_t = std::ostream_iterator< detail::Point >;
   std::copy_n(dest.points.begin(), size - 1, oii_t{out, " "});
