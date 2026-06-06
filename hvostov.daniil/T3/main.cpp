@@ -22,7 +22,7 @@ int main(int argc, char** argv)
   hvostov::data_t data;
   using iit_t = std::istream_iterator< hvostov::Polygon >;
   std::copy(iit_t{file}, iit_t{}, std::back_inserter(data));
-  data.erase(std::remove_if(data.begin(), data.end(), hvostov::isPolygon), data.end());
+  data.erase(std::remove_if(data.begin(), data.end(), hvostov::isPolygonEmpty), data.end());
 
   std::unordered_map< std::string, hvostov::cmd_t > cmds;
   cmds["AREA"] = hvostov::area;
