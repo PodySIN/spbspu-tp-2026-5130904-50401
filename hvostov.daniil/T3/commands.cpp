@@ -290,11 +290,14 @@ void hvostov::maxSeq(std::istream& in, std::ostream& out, const std::vector< Pol
   using namespace std::placeholders;
   Polygon target;
   in >> target;
+  out << target << "<----------\n";
   if (!in || target.points.size() < 3) {
+    std::cout << "logic1";
     throw std::logic_error("Invalid polygon");
   }
 
   if (target.points.empty() || data.empty()) {
+    std::cout << "logic2";
     throw std::logic_error("Invalid polygon");
   }
   std::vector< bool > matches(data.size());
@@ -307,28 +310,21 @@ void hvostov::maxSeq(std::istream& in, std::ostream& out, const std::vector< Pol
   out << result.max << "\n";
 }
 
-void hvostov::detail::handleError(std::ostream& out, std::istream& in)
-{
-  out << "<INVALID COMMAND>\n";
-  auto toignore = std::numeric_limits< std::streamsize >::max();
-  in.ignore(toignore, '\n');
-}
-
-void hvostov::process(std::unordered_map< std::string, cmd_t >& cmds, data_t data)
+void hvostov::process(std::istream& in, std::ostream& out, std::unordered_map< std::string, cmd_t >& cmds, data_t data)
 {
   std::string cmd;
-  if (!(std::cin >> cmd)) {
-    return;
-  }
-  if (cmds.find(cmd) != cmds.end()) {
-    try {
-
-      cmds.at(cmd)(std::cin, std::cout, data);
-    } catch (...) {
-      hvostov::detail::handleError(std::cout, std::cin);
+  if (in >> cmd) {
+    if (cmds.find(cmd) != cmds.end()) {
+      try {
+        cmds.at(cmd)(in, out, data);
+      } catch (...) {
+        out << "<INVALID COMMAND>\n";
+      }
+    } else {
+      out << "<INVALID COMMAND>\n";
+      in.clear();
+      in.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
     }
-  } else {
-    hvostov::detail::handleError(std::cout, std::cin);
+    process(in, out, cmds, data);
   }
-  process(cmds, data);
 }

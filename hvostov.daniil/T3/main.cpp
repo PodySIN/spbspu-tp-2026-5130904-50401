@@ -29,5 +29,5 @@ int main(int argc, char** argv)
   cmds["COUNT"] = hvostov::count;
   cmds["INFRAME"] = hvostov::inFrame;
   cmds["MAXSEQ"] = hvostov::maxSeq;
-  hvostov::process(cmds, data);
+  hvostov::process(std::cin, std::cout, cmds, data);
 }

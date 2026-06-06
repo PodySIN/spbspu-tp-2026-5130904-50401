@@ -34,7 +34,6 @@ namespace hvostov {
     int getPolygonMinY(const Polygon& p);
     int getPolygonMaxY(const Polygon& p);
 
-    void handleError(std::ostream& out, std::istream& in);
   }
 
   void area(std::istream&, std::ostream&, const std::vector< Polygon >&);
@@ -46,7 +45,7 @@ namespace hvostov {
 
   using cmd_t = std::function< void(std::istream&, std::ostream&, const std::vector< hvostov::Polygon >&) >;
   using data_t = std::vector< hvostov::Polygon >;
-  void process(std::unordered_map< std::string, cmd_t >& cmds, data_t data);
+  void process(std::istream& in, std::ostream& out, std::unordered_map< std::string, cmd_t >& cmds, data_t data);
 }
 
 #endif

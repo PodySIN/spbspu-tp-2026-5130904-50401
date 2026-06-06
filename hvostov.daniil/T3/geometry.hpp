@@ -11,13 +11,14 @@ namespace hvostov {
     };
     std::istream& operator>>(std::istream& in, Point& point);
     std::ostream& operator<<(std::ostream& out, const Point& point);
+    void readPoints(std::istream& in, std::vector< Point >& pts, size_t n);
   }
 
   struct Polygon {
     std::vector< detail::Point > points;
   };
-  std::istream& operator>>(std::istream& in, Polygon& point);
-  std::ostream& operator<<(std::ostream& out, const Polygon& point);
+  std::istream& operator>>(std::istream& in, Polygon& polygon);
+  std::ostream& operator<<(std::ostream& out, const Polygon& polygon);
   bool isPolygonEmpty(const Polygon& polygon);
 }
 

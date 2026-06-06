@@ -1,73 +1,75 @@
 #include "geometry.hpp"
-#include <algorithm>
-#include <iostream>
-#include <iterator>
-#include <limits>
 #include "input.hpp"
+#include <iostream>
+#include <limits>
+#include <iterator>
+#include <algorithm>
+
+void hvostov::detail::readPoints(std::istream& in, std::vector< Point >& pts, size_t n)
+{
+  if (n == 0 || !in) {
+    return;
+  }
+  Point pt;
+  in >> pt;
+  if (in) {
+    pts.push_back(pt);
+    hvostov::detail::readPoints(in, pts, n - 1);
+  }
+}
 
 std::istream& hvostov::detail::operator>>(std::istream& in, Point& dest)
 {
-  std::istream::sentry sentry(in);
+  std::istream::sentry sentry(in, true);
   if (!sentry) {
     return in;
   }
-  IOguard fmtguard(in);
-  using d_t = Delimiter;
-  detail::Point p{0, 0};
-  in >> d_t{'('} >> p.x >> d_t{';'} >> p.y >> d_t{')'};
-  if (in) {
-    dest = p;
+  if (in.peek() == '\n') {
+    in.setstate(std::ios::failbit);
+    return in;
   }
+  using d_t = Delimiter;
+  in >> d_t{'('} >> dest.x >> d_t{';'} >> dest.y >> d_t{')'};
   return in;
 }
 
 std::ostream& hvostov::detail::operator<<(std::ostream& out, const Point& dest)
 {
-  std::ostream::sentry sentry(out);
-  if (!sentry) {
-    return out;
-  }
-  IOguard fmtguard(out);
   out << '(' << dest.x << ';' << dest.y << ')';
   return out;
 }
 
 std::istream& hvostov::operator>>(std::istream& in, Polygon& dest)
 {
+  dest.points.clear();
   std::istream::sentry sentry(in);
   if (!sentry) {
     return in;
   }
-  IOguard fmtguard(in);
 
+  const std::streamsize max = std::numeric_limits< std::streamsize >::max();
   size_t size = 0;
   in >> size;
-  const std::streamsize max = std::numeric_limits< std::streamsize >::max();
 
   if (!in || size < 3) {
     in.clear();
     in.ignore(max, '\n');
-    dest.points.clear();
     return in;
   }
 
   std::vector< detail::Point > polygon;
   polygon.reserve(size);
+  hvostov::detail::readPoints(in, polygon, size);
 
-  using iit_t = std::istream_iterator< detail::Point >;
-  std::copy_n(iit_t{in}, size, std::back_inserter(polygon));
-
-  if (!in || polygon.size() != size) {
+  if (polygon.size() != size) {
     in.clear();
     in.ignore(max, '\n');
-    dest.points.clear();
     return in;
   }
 
-  if (in.peek() != EOF && in.peek() != '\n') {
+  if (in.peek() != '\n' && in.peek() != EOF) {
     in.clear();
     in.ignore(max, '\n');
-    dest.points.clear();
     return in;
   }
 
