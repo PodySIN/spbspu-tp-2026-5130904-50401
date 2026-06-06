@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <iostream>
 #include <iterator>
-
+#include <limits>
 #include "input.hpp"
 
 std::istream& hvostov::detail::operator>>(std::istream& in, Point& dest)
@@ -39,23 +39,33 @@ std::istream& hvostov::operator>>(std::istream& in, Polygon& dest)
     return in;
   }
   IOguard fmtguard(in);
+
   size_t size = 0;
   in >> size;
+  const std::streamsize max = std::numeric_limits< std::streamsize >::max();
+
   if (!in || size < 3) {
-    in.setstate(std::ios_base::failbit);
+    in.clear();
+    in.ignore(max, '\n');
     dest.points.clear();
     return in;
   }
-  using point = detail::Point;
-  std::vector< point > polygon;
-  using iit_t = std::istream_iterator< point >;
+
+  std::vector< detail::Point > polygon;
+  polygon.reserve(size);
+
+  using iit_t = std::istream_iterator< detail::Point >;
   std::copy_n(iit_t{in}, size, std::back_inserter(polygon));
-  if (in && polygon.size() == size) {
-    dest.points = polygon;
-  } else {
-    in.setstate(std::ios_base::failbit);
+
+  if (!in || polygon.size() != size) {
+    in.clear(); // Очищаем failbit
+    in.ignore(max, '\n');
     dest.points.clear();
+    return in;
   }
+
+  dest.points = std::move(polygon);
+  in.ignore(max, '\n');
   return in;
 }
 
@@ -72,4 +82,9 @@ std::ostream& hvostov::operator<<(std::ostream& out, const Polygon& dest)
   std::copy_n(dest.points.begin(), size - 1, oii_t{out, " "});
   out << dest.points[size - 1];
   return out;
+}
+
+bool hvostov::isPolygonEmpty(const Polygon& polygon)
+{
+  return polygon.points.empty();
 }
