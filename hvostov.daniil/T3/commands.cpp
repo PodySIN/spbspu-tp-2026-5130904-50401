@@ -4,7 +4,139 @@
 #include <iostream>
 #include <numeric>
 #include <vector>
+#include <cmath>
 #include <limits>
+
+double hvostov::detail::triangleArea(const std::vector< Point >& pts, size_t i)
+{
+  const auto& a = pts[0];
+  const auto& b = pts[i];
+  const auto& c = pts[i + 1];
+  double cross = (b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y);
+  return cross * 0.5;
+}
+
+double hvostov::detail::getArea(const Polygon& p)
+{
+  using namespace std::placeholders;
+  if (p.points.size() < 3) {
+    return 0.0;
+  }
+
+  std::vector< size_t > indices(p.points.size() - 2);
+  std::iota(indices.begin(), indices.end(), 1);
+
+  std::vector< double > areas(indices.size());
+  std::transform(indices.begin(), indices.end(), areas.begin(), std::bind(triangleArea, std::cref(p.points), _1));
+
+  double sum = std::accumulate(areas.begin(), areas.end(), 0);
+  return std::abs(sum);
+}
+
+bool hvostov::detail::isEvenVertexes(const Polygon& p)
+{
+  return p.points.size() % 2 == 0;
+}
+
+bool hvostov::detail::isOddVertexes(const Polygon& p)
+{
+  return p.points.size() % 2 == 1;
+}
+
+bool hvostov::detail::hasVertexesCount(size_t n, const Polygon& p)
+{
+  return p.points.size() == n;
+}
+
+size_t hvostov::detail::getVertexesCount(const Polygon& p)
+{
+  return p.points.size();
+}
+
+int hvostov::detail::getX(const Point& p)
+{
+  return p.x;
+}
+
+int hvostov::detail::getY(const Point& p)
+{
+  return p.y;
+}
+
+bool hvostov::detail::isPointInBoundingBox(const Point& p, int minX, int minY, int maxX, int maxY)
+{
+  return p.x >= minX && p.x <= maxX && p.y >= minY && p.y <= maxY;
+}
+
+bool hvostov::detail::pointEqual(const Point& p1, const Point& p2)
+{
+  return p1.x == p2.x && p1.y == p2.y;
+}
+
+bool hvostov::detail::polygonsEqual(const Polygon& a, const Polygon& b)
+{
+  using namespace std::placeholders;
+  if (a.points.size() != b.points.size())
+    return false;
+  return std::equal(a.points.begin(), a.points.end(), b.points.begin(), std::bind(pointEqual, _1, _2));
+}
+
+hvostov::detail::SeqState hvostov::detail::updateSeqState(SeqState state, bool match)
+{
+  if (match) {
+    state.current++;
+    if (state.current > state.max)
+      state.max = state.current;
+  } else {
+    state.current = 0;
+  }
+  return state;
+}
+
+double hvostov::detail::sumAreasOfFiltered(const std::vector< Polygon >& data,
+                                           std::function< bool(const Polygon&) > pred)
+{
+  std::vector< Polygon > filtered(data.size());
+  auto it = std::copy_if(data.begin(), data.end(), filtered.begin(), pred);
+  filtered.erase(it, filtered.end());
+
+  std::vector< double > areas(filtered.size());
+  std::transform(filtered.begin(), filtered.end(), areas.begin(), getArea);
+
+  return std::accumulate(areas.begin(), areas.end(), 0.0);
+}
+
+int hvostov::detail::getPolygonMinX(const Polygon& p)
+{
+  using namespace std::placeholders;
+  auto it = std::min_element(p.points.begin(), p.points.end(),
+                             std::bind(std::less< int >(), std::bind(getX, _1), std::bind(getX, _2)));
+  return it->x;
+}
+
+int hvostov::detail::getPolygonMaxX(const Polygon& p)
+{
+  using namespace std::placeholders;
+  auto it = std::max_element(p.points.begin(), p.points.end(),
+                             std::bind(std::less< int >(), std::bind(getX, _1), std::bind(getX, _2)));
+  return it->x;
+}
+
+int hvostov::detail::getPolygonMinY(const Polygon& p)
+{
+  using namespace std::placeholders;
+  auto it = std::min_element(p.points.begin(), p.points.end(),
+                             std::bind(std::less< int >(), std::bind(getY, _1), std::bind(getY, _2)));
+  return it->y;
+}
+
+int hvostov::detail::getPolygonMaxY(const Polygon& p)
+{
+  using namespace std::placeholders;
+  auto it = std::max_element(p.points.begin(), p.points.end(),
+                             std::bind(std::less< int >(), std::bind(getY, _1), std::bind(getY, _2)));
+  return it->y;
+}
 
 void hvostov::area(std::istream& in, std::ostream& out, const std::vector< Polygon >& data)
 {
